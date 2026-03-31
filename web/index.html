@@ -614,12 +614,14 @@
             
             if (!btn || !status) {
                 console.error('Button or status element not found');
+                alert('錯誤：找不到按鈕或狀態元素');
                 return;
             }
             
             btn.disabled = true;
             status.className = 'status info';
             status.textContent = '⏳ 模擬運行中...';
+            console.log('Status updated to running');
 
             try {
                 const config = {
@@ -641,7 +643,6 @@
                     lambdaReg: 0.06,
                     regEps: 1.0e-4,
                     potentialMix: 1.0,
-                    // v9 審計認證參數
                     v9_certified: {
                         sigma_init: [0.42, 0.44, 0.46],
                         overlap_width_factor: [1.8, 2.1],
@@ -652,23 +653,32 @@
                         selected_branch: "filled_core"
                     }
                 };
+                console.log('Config created:', config);
 
                 const simulator = new QSTElectronSimulator(config);
+                console.log('Simulator created, running...');
                 const result = simulator.run();
+                console.log('Simulation result:', result);
 
                 // Update status
                 status.className = 'status success';
                 status.textContent = '✅ 模擬完成！';
+                console.log('Status updated to success');
 
                 // Update charts
+                console.log('Updating charts...');
                 updateCharts(result, config);
+                console.log('Charts updated');
 
                 // Update tables
+                console.log('Updating tables...');
                 updateTables(result);
+                console.log('Tables updated');
 
             } catch (error) {
+                console.error('Simulation error:', error);
                 status.className = 'status error';
-                status.textContent = '❌ 錯誤：' + error.message;
+                status.textContent = '❌ 錯誤：' + error.message + ' (見 Console)';
             } finally {
                 btn.disabled = false;
                 console.log('Simulation completed');
@@ -676,12 +686,20 @@
         }
 
         function updateCharts(result, config) {
+            console.log('updateCharts called with result:', result);
             const { sol, shellData } = result;
+            console.log('sol:', sol, 'shellData:', shellData);
 
-            // Wavefunction chart
-            const wfCtx = document.getElementById('wavefunctionChart').getContext('2d');
-            if (wavefunctionChart) wavefunctionChart.destroy();
-            wavefunctionChart = new Chart(wfCtx, {
+            try {
+                // Wavefunction chart
+                const wfCanvas = document.getElementById('wavefunctionChart');
+                if (!wfCanvas) {
+                    console.error('wavefunctionChart canvas not found');
+                    return;
+                }
+                const wfCtx = wfCanvas.getContext('2d');
+                if (wavefunctionChart) wavefunctionChart.destroy();
+                wavefunctionChart = new Chart(wfCtx, {
                 type: 'line',
                 data: {
                     labels: sol.r.map((_, i) => i),
