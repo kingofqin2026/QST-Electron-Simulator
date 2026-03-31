@@ -1,0 +1,55 @@
+% QST v9 Appendix Fragment
+\subsection*{Appendix D.X --- Audit-Certified Operating Region for the Electron Reduced-Residue Chain}
+
+\paragraph{Scope and status.}
+This appendix records the current numerical-audit status of the reduced electron chain
+\[
+\text{selected branch}
+\;\Rightarrow\;
+\text{dominant shell}
+\;\Rightarrow\;
+J^\mu_{\rm eff,e}
+\;\Rightarrow\;
+R^{(2,e)}_{LR}(s_*)_{\rm reduced}
+\;\Rightarrow\;
+\mathcal{N}_e^{\rm toy,de}(s_*).
+\]
+The result stated here is an operating envelope, not a full one-loop theorem.
+
+\paragraph{Certified operating region.}
+The V8 audit yields
+\[
+\boxed{
+\sigma_{\rm init} \in \{0.42,\,0.44,\,0.46\},\qquad
+\mathrm{overlap\_width\_factor} \in \{1.8,\,2.1\},\qquad
+\mathrm{strict\_channel\_floor} \in \{0.05,\,0.07\}
+}
+\]
+with branch/dominant-shell lock
+\[
+\boxed{b_*=\mathrm{filled\_core},\qquad n_*=4.}
+\]
+
+\paragraph{Recommended certified point.}
+The median-anchored certified recommendation uses $\sigma_{\rm init}=0.42$, $\mathrm{overlap\_width\_factor}=1.8$, $\mathrm{strict\_channel\_floor}=0.05$, with $b_*=\mathrm{filled_core}$, $n_*=4$, $\sigma_{\rm out}\approx 0.742621$, $R_{\rm raw}\approx -2.210659e-05$, and $R_{\rm clipped}\approx -2.210659e-05$.
+
+\paragraph{Closure classification.}
+\begin{itemize}
+\item macroscopic foundation: closed,
+\item branch-to-field lowest-order working closure: pass,
+\item dominant-shell payload emission: pass,
+\item reduced residue injection layer: pass,
+\item median-anchored robust operating region: pass,
+\item full $R^{(2,e)}_{LR}(s_*)$ one-loop normalized theorem: open,
+\item full $N(s_*)$ derivation: open,
+\item oscillatory amplitude $A$: open.
+\end{itemize}
+
+\paragraph{Conservative claim.}
+\[
+\boxed{
+\text{There exists a numerically stable, audit-certified operating region in which the reduced electron chain}
+\\
+\text{reproducibly selects the filled-core branch and the same dominant shell } n_*=4.
+}
+\]

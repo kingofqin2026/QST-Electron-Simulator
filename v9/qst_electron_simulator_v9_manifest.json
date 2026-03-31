@@ -1,0 +1,70 @@
+{
+  "version": "v9",
+  "source_version": "v8",
+  "artifact_type": "appendix_style_audit_statement",
+  "certified_region_summary": {
+    "total_runs": 12,
+    "robust_band_passes": 8,
+    "certified_points": 8,
+    "provisional_points": 0,
+    "excluded_points": 4,
+    "selected_branch_counts_certified": {
+      "filled_core": 8
+    },
+    "n_star_counts_certified": {
+      "4": 8
+    },
+    "certified_sigma_values": [
+      0.42,
+      0.44,
+      0.46
+    ],
+    "certified_overlap_values": [
+      1.8,
+      2.1
+    ],
+    "certified_strict_floor_values": [
+      0.05,
+      0.07
+    ],
+    "recommended_point": {
+      "recommended_sigma_init": 0.42,
+      "recommended_overlap_width_factor": 1.8,
+      "recommended_strict_channel_floor": 0.05,
+      "recommended_selected_branch": "filled_core",
+      "recommended_n_star": 4,
+      "recommended_sigma_out": 0.7426210625673264,
+      "recommended_raw_residue": -2.2106590849541485e-05,
+      "recommended_clipped_residue": -2.2106590849541485e-05,
+      "reason": "Certified point closest to the median anchored clipped residue."
+    },
+    "operating_rule": "sigma_init in [0.42, 0.44, 0.46], overlap_width_factor in [1.8, 2.1], strict_channel_floor in [0.05, 0.07], with selected_branch = filled_core and n_star = 4.",
+    "note": "V8 compresses the V7.2 robust-pass subset into an audit-certified operating region. This is an operating envelope for the toy-normalized chain, not the final theorem domain."
+  },
+  "recommendation": {
+    "recommended_sigma_init": 0.42,
+    "recommended_overlap_width_factor": 1.8,
+    "recommended_strict_channel_floor": 0.05,
+    "recommended_selected_branch": "filled_core",
+    "recommended_n_star": 4,
+    "recommended_sigma_out": 0.7426210625673264,
+    "recommended_raw_residue": -2.2106590849541485e-05,
+    "recommended_clipped_residue": -2.2106590849541485e-05,
+    "reason": "Certified point closest to the median anchored clipped residue."
+  },
+  "closure_upgrade": {
+    "v7_2_median_anchored_robust_band": "PASS",
+    "v8_certified_operating_region_extraction": "PASS",
+    "certified_points": 8,
+    "provisional_points": 0,
+    "excluded_points": 4,
+    "full_R2e_LR_normalized": "OPEN",
+    "one_loop_N(s_*)": "OPEN",
+    "oscillatory_amplitude_A": "OPEN"
+  },
+  "files": {
+    "markdown": "qst_electron_simulator_v9_audit_statement.md",
+    "latex": "qst_electron_simulator_v9_appendix_fragment.tex",
+    "manifest": "qst_electron_simulator_v9_manifest.json"
+  }
+}
