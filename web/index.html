@@ -793,26 +793,8 @@
             document.getElementById('shellRadius').textContent = dominantShellPayload.shellRadius.toFixed(4);
             document.getElementById('payloadSigma').textContent = dominantShellPayload.sigmaOut.toFixed(4);
 
-            // v9 審計閉合分類（固定顯示 v9 狀態）
-            const auditStatus = [
-                ['CLOSED', 'pass'],
-                ['PASS', 'pass'],
-                ['PASS', 'pass'],
-                ['PASS', 'pass'],
-                ['PASS', 'pass'],
-                ['OPEN', 'open'],
-                ['OPEN', 'open'],
-                ['OPEN', 'open']
-            ];
-
-            const auditIds = ['audit1', 'audit2', 'audit3', 'audit4', 'audit5', 'audit6', 'audit7', 'audit8'];
-            auditIds.forEach((id, i) => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.textContent = auditStatus[i][0];
-                    el.className = 'badge ' + auditStatus[i][1];
-                }
-            });
+            // v9 審計閉合分類已靜態顯示，無需更新
+            console.log('Tables updated successfully');
         }
 
         // Auto-run on load
