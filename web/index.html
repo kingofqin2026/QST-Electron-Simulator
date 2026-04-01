@@ -323,10 +323,10 @@
                 const r = Array.from({length: n}, (_, i) => i * dr);
 
                 // Initial guess: Gaussian-like
-                let u = r.map(ri => Math.exp(-(ri / 2) ** 2) * (1 + 0.15 * Math.exp(-(ri / 0.8) ** 2)));
+                let u = r.map(ri => Math.exp(-((ri / 2) ** 2)) * (1 + 0.15 * Math.exp(-((ri / 0.8) ** 2))));
                 const norm = Math.sqrt(u.reduce((sum, val, i) => {
                     const weight = i === 0 || i === n-1 ? 0.5 : 1;
-                    return sum + val ** 2 * weight;
+                    return sum + (val ** 2) * weight;
                 }, 0) * dr);
                 u = u.map(val => val / norm);
 
@@ -344,7 +344,7 @@
                     let uNew = eigenvector.map(Math.abs);
                     const normNew = Math.sqrt(uNew.reduce((sum, val, i) => {
                         const weight = i === 0 || i === n-1 ? 0.5 : 1;
-                        return sum + val ** 2 * weight;
+                        return sum + (val ** 2) * weight;
                     }, 0) * dr);
                     uNew = uNew.map(val => val / normNew);
 
@@ -352,20 +352,20 @@
                     u = u.map((val, i) => 0.65 * val + 0.35 * uNew[i]);
                     const normFinal = Math.sqrt(u.reduce((sum, val, i) => {
                         const weight = i === 0 || i === n-1 ? 0.5 : 1;
-                        return sum + val ** 2 * weight;
+                        return sum + (val ** 2) * weight;
                     }, 0) * dr);
                     u = u.map(val => val / normFinal);
                 }
 
                 const D = this.computeD(u, r);
                 const J = this.computeJ(u, cCore);
-                const rho = u.map(val => val ** 2);
+                const rho = u.map(val => (val ** 2));
                 const gradU = u.map((val, i) => {
                     if (i === 0) return (u[1] - u[0]) / dr;
                     if (i === n-1) return (u[n-1] - u[n-2]) / dr;
                     return (u[i+1] - u[i-1]) / (2 * dr);
                 });
-                const energyDensity = u.map((val, i) => 0.5 * gradU[i] ** 2 + 0.5 * U[i] * rho[i]);
+                const energyDensity = u.map((val, i) => 0.5 * (gradU[i] ** 2) + 0.5 * U[i] * rho[i]);
 
                 return { r, u, D, J, rho, energyDensity, eigenvalue };
             }
@@ -387,15 +387,15 @@
             }
 
             computeJ(u, coreChannelCount) {
-                return u.map(val => this.config.kappa * coreChannelCount * val ** 2);
+                return u.map(val => this.config.kappa * coreChannelCount * (val ** 2));
             }
 
             effectivePotential(r, D, J, sigma) {
                 return r.map((ri, i) => {
-                    const reg = this.config.lambdaReg / (ri ** 2 + this.config.regEps);
-                    const UD = this.config.lambdaD * (D[i] - this.config.D0) ** 2;
-                    const UJ = this.config.lambdaJ * J[i] ** 2;
-                    const sigmaTerm = this.config.potentialMix * sigma ** 2 * Math.abs(D[i] - this.config.D0);
+                    const reg = this.config.lambdaReg / ((ri ** 2) + this.config.regEps);
+                    const UD = this.config.lambdaD * ((D[i] - this.config.D0) ** 2);
+                    const UJ = this.config.lambdaJ * (J[i] ** 2);
+                    const sigmaTerm = this.config.potentialMix * (sigma ** 2) * Math.abs(D[i] - this.config.D0);
                     return reg + UD + UJ + sigmaTerm;
                 });
             }
@@ -409,7 +409,7 @@
                 });
                 const norm = Math.sqrt(psi.reduce((sum, val, i) => {
                     const weight = i === 0 || i === n-1 ? 0.5 : 1;
-                    return sum + val ** 2 * weight;
+                    return sum + (val ** 2) * weight;
                 }, 0) * dr);
                 return {
                     eigenvalue: U.reduce((a, b) => a + b, 0) / n,
