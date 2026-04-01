@@ -333,13 +333,16 @@
                 const cCore = Math.max(1, coreChannelCount);
 
                 // Self-consistent iteration
+                let eigenvalue = 0;
                 for (let iter = 0; iter < 14; iter++) {
                     const D = this.computeD(u, r);
                     const J = this.computeJ(u, cCore);
                     const U = this.effectivePotential(r, D, J, sigma);
 
                     // Ground state (simplified power method)
-                    const {eigenvalue, eigenvector} = this.groundState(U, dr);
+                    const result = this.groundState(U, dr);
+                    eigenvalue = result.eigenvalue;
+                    const eigenvector = result.eigenvector;
 
                     let uNew = eigenvector.map(Math.abs);
                     const normNew = Math.sqrt(uNew.reduce((sum, val, i) => {
