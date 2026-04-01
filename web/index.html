@@ -359,6 +359,7 @@
 
                 const D = this.computeD(u, r);
                 const J = this.computeJ(u, cCore);
+                const U = this.effectivePotential(r, D, J, sigma);
                 const rho = u.map(val => (val ** 2));
                 const gradU = u.map((val, i) => {
                     if (i === 0) return (u[1] - u[0]) / dr;
