@@ -690,16 +690,15 @@
             const { sol, shellData } = result;
             console.log('sol:', sol, 'shellData:', shellData);
 
-            try {
-                // Wavefunction chart
-                const wfCanvas = document.getElementById('wavefunctionChart');
-                if (!wfCanvas) {
-                    console.error('wavefunctionChart canvas not found');
-                    return;
-                }
-                const wfCtx = wfCanvas.getContext('2d');
-                if (wavefunctionChart) wavefunctionChart.destroy();
-                wavefunctionChart = new Chart(wfCtx, {
+            // Wavefunction chart
+            const wfCanvas = document.getElementById('wavefunctionChart');
+            if (!wfCanvas) {
+                console.error('wavefunctionChart canvas not found');
+                return;
+            }
+            const wfCtx = wfCanvas.getContext('2d');
+            if (wavefunctionChart) wavefunctionChart.destroy();
+            wavefunctionChart = new Chart(wfCtx, {
                 type: 'line',
                 data: {
                     labels: sol.r.map((_, i) => i),
