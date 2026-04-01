@@ -841,6 +841,9 @@
         }
 
         // Three.js 3D 電子軌道可視化
+        let electronPoints = null;
+        let shellMarkers = [];
+
         function init3DScene() {
             const container = document.getElementById('threejs-container');
             if (!container) {
@@ -877,34 +880,25 @@
             pointLight.position.set(10, 10, 10);
             scene.add(pointLight);
 
-            // 添加原子核（中心球體）
-            const nucleusGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+            // 添加原子核（中心發光球體）
+            const nucleusGeometry = new THREE.SphereGeometry(0.3, 32, 32);
             const nucleusMaterial = new THREE.MeshPhongMaterial({ 
                 color: 0xff6b6b,
-                emissive: 0x330000
+                emissive: 0xff0000,
+                emissiveIntensity: 0.5
             });
             const nucleus = new THREE.Mesh(nucleusGeometry, nucleusMaterial);
             scene.add(nucleus);
-
-            // 添加軌道線框球體（表示電子雲）
-            const orbitGeometry = new THREE.SphereGeometry(5, 32, 32);
-            const orbitMaterial = new THREE.MeshBasicMaterial({ 
-                color: 0x3498db,
-                wireframe: true,
-                transparent: true,
-                opacity: 0.3
-            });
-            const orbitSphere = new THREE.Mesh(orbitGeometry, orbitMaterial);
-            scene.add(orbitSphere);
 
             // 動畫循環
             function animate() {
                 requestAnimationFrame(animate);
                 controls.update();
                 
-                // 緩慢旋轉軌道球體
-                orbitSphere.rotation.y += 0.002;
-                orbitSphere.rotation.x += 0.001;
+                // 電子雲緩慢旋轉
+                if (electronPoints) {
+                    electronPoints.rotation.y += 0.001;
+                }
                 
                 renderer.render(scene, camera);
             }
@@ -919,11 +913,11 @@
                 camera.updateProjectionMatrix();
             });
 
-            return { scene, camera, renderer, controls, orbitSphere };
+            return { scene, camera, renderer, controls, nucleus };
         }
 
         function update3DVisualization(sol) {
-            if (!sol || !sol.u || !sol.D) {
+            if (!sol || !sol.u || !sol.D || !sol.r) {
                 console.log('No simulation data for 3D visualization');
                 return;
             }
@@ -936,25 +930,119 @@
                 threeCamera = sceneData.camera;
                 threeRenderer = sceneData.renderer;
                 threeControls = sceneData.controls;
-                threeOrbitSphere = sceneData.orbitSphere;
+                threeNucleus = sceneData.nucleus;
             }
 
-            // 根據波函數更新電子軌道半徑
-            const maxPsi = Math.max(...sol.u.map(Math.abs));
-            const avgRadius = sol.r.reduce((sum, r, i) => sum + r * Math.abs(sol.u[i]), 0) / maxPsi;
-            
-            // 更新軌道球體大小（基於主導殼層）
-            if (threeOrbitSphere) {
-                const scale = Math.max(1, avgRadius / 5);
-                threeOrbitSphere.scale.set(scale, scale, scale);
+            // 清除舊的電子雲
+            if (electronPoints) {
+                threeScene.remove(electronPoints);
+                electronPoints.geometry.dispose();
+                electronPoints.material.dispose();
+            }
+
+            // 清除舊的殼層標記
+            shellMarkers.forEach(marker => threeScene.remove(marker));
+            shellMarkers = [];
+
+            // 根據波函數 ψ(r) 生成 3D 電子雲
+            const positions = [];
+            const colors = [];
+            const sizes = [];
+
+            // 從徑向波函數生成 3D 粒子
+            const numParticles = 2000;
+            for (let i = 0; i < numParticles; i++) {
+                // 隨機選擇一個徑向位置（根據 |ψ(r)|² 概率分佈）
+                const psiSquared = sol.u.map(val => val * val);
+                const totalPsi = psiSquared.reduce((a, b) => a + b, 0);
                 
-                // 根據分形維度改變顏色
-                const avgD = sol.D.reduce((a, b) => a + b, 0) / sol.D.length;
-                const hue = (avgD - 2) * 120; // 2->紅色，3->綠色，4->藍色
-                threeOrbitSphere.material.color.setHSL(hue / 360, 0.8, 0.5);
+                // 根據 |ψ|² 加權隨機選擇半徑
+                let random = Math.random() * totalPsi;
+                let selectedIndex = 0;
+                for (let j = 0; j < psiSquared.length; j++) {
+                    random -= psiSquared[j];
+                    if (random <= 0) {
+                        selectedIndex = j;
+                        break;
+                    }
+                }
+
+                const r = sol.r[selectedIndex];
+                const D = sol.D[selectedIndex];
+
+                // 在球面上隨機分佈角度
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+
+                // 轉換為笛卡爾坐標
+                const x = r * Math.sin(phi) * Math.cos(theta);
+                const y = r * Math.sin(phi) * Math.sin(theta);
+                const z = r * Math.cos(phi);
+
+                positions.push(x, y, z);
+
+                // 根據分形維度 D(r) 設置顏色
+                const hue = Math.max(0, Math.min(1, (D - 2) / 2)); // D: 2->0(紅), 4->1(藍)
+                const color = new THREE.Color().setHSL(hue, 0.8, 0.5);
+                colors.push(color.r, color.g, color.b);
+
+                // 根據 |ψ| 設置粒子大小
+                const size = 0.1 + 0.3 * Math.abs(sol.u[selectedIndex]);
+                sizes.push(size);
             }
 
-            console.log('3D visualization updated');
+            // 創建粒子系統
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            geometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
+
+            // 自定義著色器材質
+            const material = new THREE.PointsMaterial({
+                size: 0.15,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true
+            });
+
+            electronPoints = new THREE.Points(geometry, material);
+            threeScene.add(electronPoints);
+
+            // 添加主導殼層標記（n* = 4）
+            const nStar = 4; // 主導殼層
+            const shellRadius = sol.r[Math.floor(sol.r.length * 0.6)]; // 估算殼層半徑
+            
+            const shellGeometry = new THREE.SphereGeometry(shellRadius, 32, 32);
+            const shellMaterial = new THREE.MeshBasicMaterial({
+                color: 0x2ecc71,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.3
+            });
+            const shellMarker = new THREE.Mesh(shellGeometry, shellMaterial);
+            threeScene.add(shellMarker);
+            shellMarkers.push(shellMarker);
+
+            // 添加殼層標籤
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 64;
+            context.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            context.font = 'Bold 32px Arial';
+            context.fillText(`n* = ${nStar}`, 10, 40);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const labelMaterial = new THREE.SpriteMaterial({ map: texture });
+            const label = new THREE.Sprite(labelMaterial);
+            label.position.set(0, shellRadius + 2, 0);
+            label.scale.set(4, 1, 1);
+            threeScene.add(label);
+            shellMarkers.push(label);
+
+            console.log(`3D visualization updated: ${numParticles} particles, shell n*=${nStar}`);
         }
 
         // Auto-run on load
